@@ -1,0 +1,10 @@
+﻿Designator,Footprint,Quantity,Value,LCSC Part #
+"D1, D2",LED_D3.0mm,2,LED,
+"J1, J3",PinHeader_1x16_P2.54mm_Vertical,2,Conn_01x16_Pin,
+J2,DSUB-9_Pins_Horizontal_P2.77x2.84mm_EdgePinOffset4.94mm_Housed_MountingHolesOffset4.94mm,1,DE9_Plug_MountingHoles,
+J4,PinHeader_1x04_P2.54mm_Vertical,1,SSD1306 I2C Display (optional),
+J5,PinHeader_1x02_P2.54mm_Vertical,1,Power In,
+J6,PinHeader_2x05_P2.54mm_Vertical,1,Remote DE9,
+"R1, R2",R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal,2,1K,
+SW1,SW_Tactile_SPST_Angled_PTS645Vx39-2LFS,1,Pairing Button,
+U1,RaspberryPi_Pico_Common_SMD,1,Pico,
