@@ -43,6 +43,9 @@ up as a standard USB keyboard.
   - `Ctrl` + `Alt` + `1`: **PC layout** (plain PC symbols)
 
   The selected layout is saved in EEPROM and survives unplugging.
+- **Windows / GUI key.** The CoCo has no Windows key, so tapping `Ctrl` + `Alt` together
+  and releasing them, with no other key in between, sends one. Holding them still
+  works as normal `Ctrl` and `Alt`.
 - **Special keys.** `CLEAR` sends `Home` and `BREAK` sends `Esc`. `ALT`, `CTRL`, `F1`,
   and `F2` pass straight through.
 - **Joystick.** An Atari-style digital joystick on the DE9 (J2) sends the arrow keys,
