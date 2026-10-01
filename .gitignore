@@ -1,0 +1,7 @@
+# KiCad lock files and local history
+~*.lck
+*.lck
+.history/
+
+# Downloaded plugin installer
+com.github.bennymeg.JLC-Plugin-for-KiCad_*.zip
