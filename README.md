@@ -1,47 +1,52 @@
 # CoCo Pico Keyboard Interface
 
-A small interposer PCB that turns a real **TRS-80 Color Computer 3 keyboard** into a
-**USB keyboard**, using a Raspberry Pi Pico (RP2040). The CoCo keyboard's ribbon
-connector plugs into the board, the Pico scans the original 7×8 key matrix, and the
-result enumerates on any PC (or CoCo emulator) as a standard USB HID keyboard.
+A Raspberry Pi Pico board that connects to the keyboard matrix of a **TRS-80 Color
+Computer 3**. Its 16-pin keyboard header (J1) is wired pin-for-pin to the CoCo 3
+keyboard connector, so the same board can sit on either side of that connector.
+Which firmware you flash decides which way the keystrokes go.
 
-The board also has a DE9 port for an Atari-style digital joystick, so a classic stick
-can be used alongside the keyboard.
+Designed in KiCad. Built and tested.
 
-Designed in KiCad. Built, flashed, and fully tested.
+## Two firmware loads, two directions
 
-## Firmware
-
-There are two firmware loads for this board. Both use the **same pin mapping**, so
-either one can be flashed onto the same hardware without changes.
-
-| | **QMK** (recommended) | **KMK** |
+| | **1. QMK `coco`** | **2. usb-to-coco** |
 |---|---|---|
-| Language / runtime | C, compiled to a `.uf2` | Python on CircuitPython |
-| Repository | [wdathing/qmk_firmware → `keyboards/coco`](https://github.com/wdathing/qmk_firmware/tree/master/keyboards/coco) | [wdathing/kmk_firmware_coco → `code.py`](https://github.com/wdathing/kmk_firmware_coco/blob/main/code.py) |
-| CoCo symbol mapping | Yes: shifted keys send the CoCo's characters | No: plain PC symbols |
-| CoCo / PC layout switch | Yes, saved across power cycles | No |
-| DE9 joystick | Yes | No |
-| Status | Main, full-featured load | Earlier, minimal bring-up load |
+| Direction | Real CoCo keyboard **→** PC (USB) | Modern USB / Bluetooth keyboard **→** real CoCo |
+| J1 connects to | The CoCo 3 **keyboard's** ribbon cable | The CoCo 3 **motherboard's** keyboard connector |
+| Pico | Pico (RP2040) | Pico 2 W (RP2350 + Bluetooth) |
+| What the Pico does | Scans the matrix and acts as a USB HID keyboard | Acts as a USB / Bluetooth host and emulates the matrix |
+| Repository | [wdathing/qmk_firmware → `keyboards/coco`](https://github.com/wdathing/qmk_firmware/tree/master/keyboards/coco) | [wdathing/usb-to-coco](https://github.com/wdathing/usb-to-coco) |
+| Build system | QMK (`make coco:default`) | Pico SDK 2.3.0 / CMake |
 
-### 1. QMK: `keyboards/coco`
+Both loads use the **same pin assignment** for the matrix (rows on GP0–GP6, columns
+on GP8–GP15) and share the same key layout. They are mirror images of each other:
+QMK reads the CoCo keyboard and sends modern keycodes, while usb-to-coco takes modern
+keycodes and reproduces CoCo key presses.
 
-This is the main firmware. It goes beyond a plain matrix-to-USB conversion so that the
-keyboard behaves like a CoCo keyboard:
+Both also handle the places where the two keyboards disagree: they remap shifted
+symbols so the character on the keycap you're pressing is the one that appears.
+
+---
+
+### 1. QMK `coco`: use a CoCo 3 keyboard on a PC
+
+Plug the original CoCo 3 keyboard into J1 and the Pico's USB port into a PC, a
+Raspberry Pi, or a CoCo emulator such as
+[XRoar](https://github.com/wdathing/xroar-waveshare-rp2350-pizero). The board shows
+up as a standard USB keyboard.
 
 - **CoCo shifted symbols.** On the CoCo, `Shift+2` is `"`, `Shift+7` is `'`,
-  `Shift+8` is `(`, `Shift+:` is `*`, `Shift+;` is `+`, and so on. The firmware rewrites
-  those keys so the host gets the character printed on the CoCo keycap, not the PC
-  one.
+  `Shift+8` is `(`, `Shift+:` is `*`, `Shift+;` is `+`, and so on. The firmware sends
+  whatever is printed on the CoCo keycap, not the PC character in that position.
 - **Two layouts, switchable at runtime:**
-  - `Ctrl` + `Alt` + `0`: **CoCo layout** (CoCo symbol mapping, the default)
+  - `Ctrl` + `Alt` + `0`: **CoCo layout** (CoCo symbols, the default)
   - `Ctrl` + `Alt` + `1`: **PC layout** (plain PC symbols)
 
-  The selected layout is stored in EEPROM and survives unplugging.
-- **Special keys.** `Clear` is mapped to `Home` and `Break` to `Esc`. `Alt`, `Ctrl`,
-  `F1`, and `F2` pass straight through.
-- **DE9 joystick.** An Atari-style digital stick on J2 sends arrow keys, and its fire
-  button sends `Space`:
+  The selected layout is saved in EEPROM and survives unplugging.
+- **Special keys.** `CLEAR` sends `Home` and `BREAK` sends `Esc`. `ALT`, `CTRL`, `F1`,
+  and `F2` pass straight through.
+- **Joystick.** An Atari-style digital joystick on the DE9 (J2) sends the arrow keys,
+  and its fire button sends `Space`:
 
   | DE9 pin | Function | Pico GPIO | Key sent |
   |---|---|---|---|
@@ -54,39 +59,64 @@ keyboard behaves like a CoCo keyboard:
 
 - NKRO, bootmagic, extra keys, and mouse keys are enabled.
 
-**Build and flash**, from a QMK checkout of the fork above:
+**Build and flash**, from a checkout of the QMK fork:
 
 ```bash
 make coco:default          # builds coco_default.uf2
-make coco:default:flash    # or hold BOOTSEL on the Pico, plug it in, and copy the .uf2 over
+make coco:default:flash    # or hold BOOTSEL, plug in, and copy the .uf2 over
 ```
 
-You can also enter the bootloader by holding the top-left matrix key (`@`) while
-plugging in the keyboard.
+To enter the bootloader without the BOOTSEL button, hold the top-left matrix key
+(`@`) while plugging in.
 
-### 2. KMK: `code.py`
+---
 
-A CircuitPython / [KMK](https://github.com/KMKfw/kmk_firmware) version. It was the
-first firmware brought up on this hardware and is useful for quick experiments: edit
-`code.py` on the Pico's USB drive and the change takes effect immediately, with no
-build step.
+### 2. usb-to-coco: use a modern keyboard on a real CoCo 3
 
-It maps the matrix directly to PC keys, with no CoCo symbol rewriting, no layout
-switch, and no joystick support.
+Remove the CoCo's own keyboard and plug J1 into the motherboard's keyboard
+connector. The Pico 2 W pretends to be the keyboard: it watches which column the
+CoCo is scanning and pulls the matching rows low for whatever keys are held. The CoCo
+can't tell the difference, so nothing on the CoCo side needs to change.
 
-**Install:**
+- **USB keyboards** plug into the Pico's own USB port, which runs in host mode. Use an
+  OTG adapter, and power the board through J5.
+- **Bluetooth keyboards** work too, both Classic and BLE (tested with an 8BitDo Retro
+  Mechanical keyboard and an Anker compact keyboard).
+  - Press the **pairing button (SW1)** to open a 60-second pairing window. The Pico
+    scans for nearby keyboards and connects to the first one it finds.
+  - The last keyboard is remembered and reconnects automatically on power-up.
+- **Status LEDs:**
+  - **D1** lights while the CoCo is actively scanning the keyboard, so you can confirm
+    the CoCo is alive and connected.
+  - **D2** lights while any key is held.
+- **Keycap-accurate symbols.** On a modern keyboard, `Shift+2` types `@`, `Shift+;`
+  types `:`, and the `'`/`"` key types quotes. Each one is translated to the CoCo key
+  (with or without CoCo SHIFT) that produces that character.
+- **Special keys.** `Esc` and `Pause` send BREAK, `Home` sends CLEAR, `Backspace`
+  sends ← (the CoCo's erase-left), and `` ` `` sends @.
 
-1. Flash [CircuitPython](https://circuitpython.org/board/raspberry_pi_pico/) onto the Pico.
-2. Copy the `kmk/` folder and `code.py` from the repository above onto the `CIRCUITPY` drive.
+**Build and flash** with the Pico SDK (or the Raspberry Pi Pico VS Code extension):
+
+```bash
+cmake -B build -G Ninja && ninja -C build    # -> build/usb-to-coco.uf2
+```
+
+A `-DDEBUG_KEY_LOG=ON` build is available for bring-up without a CoCo. It logs
+decoded keys over UART instead of driving the matrix, because GP0/GP1 are both matrix
+rows and UART0. See the
+[usb-to-coco README](https://github.com/wdathing/usb-to-coco#debug-build) for details.
+
+---
 
 ## Key matrix
 
-Both firmwares scan the matrix in the same order as the CoCo's own PIA keyboard scan
-(columns strobed through `$FF02`, rows read through `$FF00`). The diode direction is
-COL2ROW.
+The scan order matches the CoCo's own PIA keyboard scan: columns are strobed through
+`$FF02` (PB0–PB7), and rows are read through `$FF00` (PA0–PA6). J1 matches CN2 on the
+CoCo 3 motherboard pin-for-pin, as documented in the Tandy CoCo 3 Service Manual,
+Figure 5-9. Pin 3 is unused on both.
 
-- **Columns** (8): GP8 – GP15
 - **Rows** (7): GP0 – GP6
+- **Columns** (8): GP8 – GP15
 
 ```
        col0   col1   col2   col3   col4   col5   col6   col7
@@ -100,24 +130,26 @@ row6   Enter  Clear  Break  Alt    Ctrl   F1     F2     Shift
 ```
 
 > The CoCo keyboard is a **diode-less** matrix, so pressing certain combinations of
-> three or more keys can produce ghost keypresses. This is a limitation of the
-> original keyboard, not of the firmware.
+> three or more keys at once can produce ghost keypresses. This comes from the
+> original keyboard, not from either firmware.
 
 ## Hardware
 
-| Ref | Part | Notes |
-|---|---|---|
-| U1 | Raspberry Pi Pico | SMD / through-hole footprint |
-| J1, J3 | 1×16 pin headers | Pico headers / CoCo keyboard connector |
-| J2 | DE9 male, right angle | Atari-style digital joystick |
-| J6 | 2×5 header | Remote DE9 (for a panel-mounted joystick connector) |
-| J4 | 1×4 header | Optional SSD1306 I²C OLED display |
-| J5 | 1×2 header | Power in |
-| D1, D2 + R1, R2 | 3 mm LEDs, 1 kΩ | Status LEDs |
-| SW1 | Right-angle tactile switch | "Pairing" button |
+| Ref | Part | Pico GPIO | Used by |
+|---|---|---|---|
+| U1 | Raspberry Pi Pico / Pico 2 W | — | both |
+| J1 | 1×16 header: CoCo keyboard matrix | GP0–6, GP8–15 | both |
+| J3 | 1×16 header, in parallel with J1 | GP0–6, GP8–15 | — |
+| J2 | DE9 male, right angle: joystick | GP20–22, GP26–27 | QMK |
+| J6 | 2×5 header: remote DE9 (mirrors J2) | same as J2 | QMK |
+| D1 + R1 | 3 mm LED, 1 kΩ: CoCo scan activity | GP19 | usb-to-coco |
+| D2 + R2 | 3 mm LED, 1 kΩ: key held | GP18 | usb-to-coco |
+| SW1 | Right-angle tactile switch: Bluetooth pairing | GP7 | usb-to-coco |
+| J4 | 1×4 header: optional SSD1306 I²C OLED | GP16 / GP17 | not yet used |
+| J5 | 1×2 header: power in (VSYS, GND) | — | usb-to-coco (USB-host mode) |
 
-The OLED header, status LEDs, and pairing button are provided on the board but are
-**not used by either firmware yet**.
+DE9 pins 1 and 6 go to the Pico's ADC-capable pins (GP27 and GP26), so J2 can also
+carry a CoCo analog joystick in the future.
 
 ## Repository contents
 
@@ -126,15 +158,15 @@ The OLED header, status LEDs, and pairing button are provided on the board but a
 | `Coco_pico_keyb.kicad_sch` / `.kicad_pcb` / `.kicad_pro` | KiCad schematic, layout, and project |
 | `Coco_pico_keyb.step` | 3D model of the assembled board |
 | `Coco_pico_keyb.dsn` / `.ses` / `.rules` | Freerouting autorouter exchange files |
-| `production/` | JLCPCB fabrication outputs (Gerbers zip, BOM, CPL/positions, IPC netlist) |
+| `production/` | JLCPCB fabrication outputs (Gerber zip, BOM, positions, IPC netlist) |
 | `Coco_pico_keyb-backups/` | KiCad project backups |
 
 The `production/` files were generated with the
-[JLC Plugin for KiCad](https://github.com/bennymeg/JLC-Plugin-for-KiCad) (Fabrication
-Toolkit). Upload `production/Coco_pico_keyb.zip` to JLCPCB to order boards.
+[JLC Plugin for KiCad](https://github.com/bennymeg/JLC-Plugin-for-KiCad). Upload
+`production/Coco_pico_keyb.zip` to JLCPCB to order boards.
 
 ## Related project
 
-[**xroar-waveshare-rp2350-pizero**](https://github.com/wdathing/xroar-waveshare-rp2350-pizero):
-a CoCo emulator for the Waveshare RP2350-PiZero that takes USB keyboard input. Together
-with this board, it lets a real CoCo 3 keyboard drive the emulator.
+[**xroar-waveshare-rp2350-pizero**](https://github.com/wdathing/xroar-waveshare-rp2350-pizero)
+is a CoCo emulator for the Waveshare RP2350-PiZero that takes USB keyboard input.
+Paired with the QMK load, it lets an original CoCo 3 keyboard drive the emulator.
