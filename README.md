@@ -173,3 +173,17 @@ The `production/` files were generated with the
 [**xroar-waveshare-rp2350-pizero**](https://github.com/wdathing/xroar-waveshare-rp2350-pizero)
 is a CoCo emulator for the Waveshare RP2350-PiZero that takes USB keyboard input.
 Paired with the QMK load, it lets an original CoCo 3 keyboard drive the emulator.
+
+## License
+
+Copyright (c) 2025-2026 William Athing.
+
+The hardware design files in this repository are released under the
+[CERN Open Hardware Licence v2 – Permissive](LICENSE) (CERN-OHL-P-2.0). You may use,
+modify, manufacture, and sell boards based on this design, including commercially, as
+long as you keep the copyright and license notices.
+
+The firmware is licensed separately:
+
+- **usb-to-coco**: MIT License
+- **QMK `coco`**: GPL-2.0-or-later, as required by QMK
