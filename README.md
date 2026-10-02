@@ -182,6 +182,8 @@ The hardware design files in this repository are released under the
 [CERN Open Hardware Licence v2 – Permissive](LICENSE) (CERN-OHL-P-2.0). You may use,
 modify, manufacture, and sell boards based on this design, including commercially, as
 long as you keep the copyright and license notices.
+This license applies to every version of the design in this repository, including
+commits made before the license file was added.
 
 The firmware is licensed separately:
 
