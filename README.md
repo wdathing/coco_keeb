@@ -32,7 +32,7 @@ symbols so the character on the keycap you're pressing is the one that appears.
 
 Plug the original CoCo 3 keyboard into J1 and the Pico's USB port into a PC, a
 Raspberry Pi, or a CoCo emulator such as
-[XRoar](https://github.com/wdathing/xroar-waveshare-rp2350-pizero). The board shows
+[XRoar](https://github.com/ugufru/xroar-waveshare-rp2350-pizero). The board shows
 up as a standard USB keyboard.
 
 - **CoCo shifted symbols.** On the CoCo, `Shift+2` is `"`, `Shift+7` is `'`,
@@ -170,7 +170,7 @@ The `production/` files were generated with the
 
 ## Related project
 
-[**xroar-waveshare-rp2350-pizero**](https://github.com/wdathing/xroar-waveshare-rp2350-pizero)
+[**xroar-waveshare-rp2350-pizero**](https://github.com/ugufru/xroar-waveshare-rp2350-pizero)
 is a CoCo emulator for the Waveshare RP2350-PiZero that takes USB keyboard input.
 Paired with the QMK load, it lets an original CoCo 3 keyboard drive the emulator.
 
