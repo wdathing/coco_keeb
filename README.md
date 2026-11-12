@@ -5,6 +5,8 @@ Computer 3**. Its 16-pin keyboard header (J1) is wired pin-for-pin to the CoCo 3
 keyboard connector, so the same board can sit on either side of that connector.
 Which firmware you flash decides which way the keystrokes go.
 
+![The board used both ways: QMK on a Pico reads a CoCo 3 keyboard for a PC, and usb-to-coco on a Pico 2 W feeds a modern keyboard into a real CoCo 3](docs/board-usage.svg)
+
 Designed in KiCad. Built and tested.
 
 ## Two firmware loads, two directions
@@ -95,6 +97,8 @@ can't tell the difference, so nothing on the CoCo side needs to change.
 - **Keycap-accurate symbols.** On a modern keyboard, `Shift+2` types `@`, `Shift+;`
   types `:`, and the `'`/`"` key types quotes. Each one is translated to the CoCo key
   (with or without CoCo SHIFT) that produces that character.
+- **Joystick.** An Atari-style digital joystick on the DE9 (J2) presses arrow keys, or
+  `W`/`A`/`S`/`D`, with fire as `Space`. Hold fire and press SW1 to switch modes.
 - **Special keys.** `Esc` and `Pause` send BREAK, `Home` sends CLEAR, `Backspace`
   sends ← (the CoCo's erase-left), and `` ` `` sends @.
 
@@ -143,8 +147,8 @@ row6   Enter  Clear  Break  Alt    Ctrl   F1     F2     Shift
 | U1 | Raspberry Pi Pico / Pico 2 W | — | both |
 | J1 | 1×16 header: CoCo keyboard matrix | GP0–6, GP8–15 | both |
 | J3 | 1×16 header, in parallel with J1 | GP0–6, GP8–15 | — |
-| J2 | DE9 male, right angle: joystick | GP20–22, GP26–27 | QMK |
-| J6 | 2×5 header: remote DE9 (mirrors J2) | same as J2 | QMK |
+| J2 | DE9 male, right angle: joystick | GP20–22, GP26–27 | both |
+| J6 | 2×5 header: remote DE9 (mirrors J2) | same as J2 | both |
 | D1 + R1 | 3 mm LED, 1 kΩ: CoCo scan activity | GP19 | usb-to-coco |
 | D2 + R2 | 3 mm LED, 1 kΩ: key held | GP18 | usb-to-coco |
 | SW1 | Right-angle tactile switch: Bluetooth pairing | GP7 | usb-to-coco |
